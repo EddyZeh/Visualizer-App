@@ -30,7 +30,8 @@ private:
 	sf::RenderWindow& window;
 	MenuUI* ui;
 	sf::Font& _font;
-	std::vector<VisualNode*> nodes;
+	//std::vector<VisualNode*> nodes;
+	VisualNode* head;
 
 	void updateLayout();
 };

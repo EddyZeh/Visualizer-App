@@ -4,7 +4,7 @@ void LinkedListVisualizer::updateLayout() {
 
 }
 
-LinkedListVisualizer::LinkedListVisualizer(sf::RenderWindow &win, MenuUI& UI, sf::Font& font) : window(win), _font(font){
+LinkedListVisualizer::LinkedListVisualizer(sf::RenderWindow &win, MenuUI& UI, sf::Font& font) : window(win), _font(font), head(nullptr){
 	ui = &UI;
 }
 
@@ -14,7 +14,17 @@ LinkedListVisualizer::~LinkedListVisualizer() {
 
 void LinkedListVisualizer::appendNode(int value) {
 	auto* newNode = new VisualNode(value, _font);
-	nodes.push_back(newNode);
+	//nodes.push_back(newNode);
+	if (!head) {
+		head = newNode;
+	}
+	else {
+		auto temp = head;
+		while (temp->next) {
+			temp = temp->next;
+		}
+		temp->next = newNode;
+	}
 	updateLayout();
 }
 
@@ -28,21 +38,28 @@ void LinkedListVisualizer::searchNode(int value) {
 
 void LinkedListVisualizer::reset() {
 
-	backToMenuRequested = false;
+	/*backToMenuRequested = false;
 
 	if (nodes.empty()) return;
 
 	for (auto* node : nodes) {
 		delete node;
 	}
-	nodes.clear();
+	nodes.clear();*/
+
+	while (head) {
+		auto temp = head;
+		head = head->next;
+		delete temp;
+	}
+	head = nullptr;
 }
 void LinkedListVisualizer::update(float deltaTime) {
 	const float startX = 100.0f;
 	const float startY = 200.0f;
 	const float spacing = 100.0f;
 
-	for (size_t i = 0; i < nodes.size(); ++i) {
+	/*for (size_t i = 0; i < nodes.size(); ++i) {
 		VisualNode* node = nodes[i];
 		float x = startX + i * spacing;
 
@@ -62,16 +79,52 @@ void LinkedListVisualizer::update(float deltaTime) {
 			node->arrowHead[1].position = node->arrow[1].position - sf::Vector2f({ 10,  10 });
 			node->arrowHead[2].position = node->arrow[1].position - sf::Vector2f({ 10, -10 });
 		}
+	}*/
+
+	auto temp = head;
+	int i = 0;
+	while (temp) {
+		float x = startX + i * spacing;
+		
+		sf::FloatRect textBounds = temp->valueText.getLocalBounds();
+
+		temp->box.setPosition({ x, startY });
+		temp->valueText.setPosition(
+			{ x + temp->box.getSize().x / 2.f - temp->valueText.getLocalBounds().size.x / 2.f,
+			startY + temp->box.getSize().y / 2.0f - temp->valueText.getCharacterSize() / 1.5f 
+			});
+		if (temp->next) {
+			temp->arrow[0].position = sf::Vector2f({ x + temp->box.getSize().x, startY + temp->box.getSize().y / 2.0f });
+			temp->arrow[1].position = sf::Vector2f({ x + spacing, startY + temp->box.getSize().y / 2.0f });
+
+			temp->arrowHead[0].position = temp->arrow[1].position;
+			temp->arrowHead[1].position = temp->arrow[1].position - sf::Vector2f({ 10, 10 });
+			temp->arrowHead[2].position = temp->arrow[1].position - sf::Vector2f({ 10, -10 });
+		}
+
+		temp = temp->next;
+		i++;
 	}
 }
 void LinkedListVisualizer::render() {
-	for (auto* node : nodes) {
+	/*for (auto* node : nodes) {
 		window.draw(node->box);
 		window.draw(node->valueText);
 		if (node != nodes.back()) {
 			window.draw(node->arrow);
 			window.draw(node->arrowHead);
 		}
+	}*/
+
+	auto node = head;
+	while (node) {
+		window.draw(node->box);
+		window.draw(node->valueText);
+		if (node->next) {
+			window.draw(node->arrow);
+			window.draw(node->arrowHead);
+		}
+		node = node->next;
 	}
 }
 void LinkedListVisualizer::handleEvent(const sf::Event& event) {
